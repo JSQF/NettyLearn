@@ -7,6 +7,11 @@
 ## packetSplicing
 自己在每个消息结尾人为加入 换行符，在 server 端根据 换行符拆解出来；  
 客户端 发送多次，但是会发送 粘包，导致发送次数和 接受到的次数不一致；
-## delimiterDecoder
+## lineBaseDecoder
 加入了 LineBasedFrameDecoder 和 StringDecoder 编码器，解决  
 粘包、拆包问题；还有 String 编码的问题。  
+# character5
+## delimiterDecoder
+固定分隔符分割报文
+## fixedlengthDecoder
+固定长度的解密器

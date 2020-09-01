@@ -1,4 +1,4 @@
-package com.yyb.learn.character4.delimiterDecoder;
+package com.yyb.learn.character4.lineBaseDecoder;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
