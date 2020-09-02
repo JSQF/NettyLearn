@@ -15,3 +15,13 @@
 固定分隔符分割报文
 ## fixedlengthDecoder
 固定长度的解密器
+# character7
+## p1
+MessagePack 编解码器开发
+## p2
+MessagePack 编解码器 + 粘包、拆包
+# character8
+使用 ProtoBuf 的编解码 器
+
+
+#增加 protobuf maven 依赖

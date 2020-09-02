@@ -1,7 +1,5 @@
-package com.yyb.learn.character7.p2;
+package com.yyb.learn.character8;
 
-import com.yyb.learn.character7.MsgPackDeconder;
-import com.yyb.learn.character7.MsgPackEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -9,48 +7,51 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
 /**
  * @Author yyb
  * @Description
- * @Date Create in 2020-09-01
- * @Time 16:21
+ * @Date Create in 2020-09-02
+ * @Time 10:19
  */
-public class EchoServce {
+public class SubReqServer {
     public void bind(int port) throws Exception {
-        NioEventLoopGroup boosGroup = new NioEventLoopGroup();
+        NioEventLoopGroup bossGroup = new NioEventLoopGroup();
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
         try{
             ServerBootstrap b = new ServerBootstrap();
-            b.group(boosGroup, workerGroup)
+            b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.SO_BACKLOG, 1024)
+                    .option(ChannelOption.SO_BACKLOG, 100)
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast("frameDeconder",
-                                    new LengthFieldBasedFrameDecoder(65535,
-                                            0, 2, 0, 2));
-                            ch.pipeline().addLast("msg decoder", new MsgPackDeconder());
-                            ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(2));
-                            ch.pipeline().addLast("msg encoder", new MsgPackEncoder());
-                            ch.pipeline().addLast(new EchoServerHandler());
+                            ch.pipeline().addLast(new ProtobufVarint32FrameDecoder());
+                            //解码 客户端发送的 SubscribeReq 信息
+                            ch.pipeline().addLast(new ProtobufDecoder(SubscribeReqProto.SubscribeReq.getDefaultInstance()));
+                            //处理半包
+                            ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
+                            //Proto 编码器
+                            ch.pipeline().addLast(new ProtobufEncoder());
+                            ch.pipeline().addLast(new SubReqServerHandler());
                         }
                     });
             ChannelFuture f = b.bind(port).sync();
             f.channel().closeFuture().sync();
         }finally {
-            boosGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
     }
 
     public static void main(String[] args) throws Exception {
-        new EchoServce().bind(8080);
+     new SubReqServer().bind(8080);
     }
 }

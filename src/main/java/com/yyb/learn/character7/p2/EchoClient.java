@@ -30,13 +30,15 @@ public class EchoClient {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
+                            //根据消息长度 分割 包
                             ch.pipeline().addLast("frameDeconder",
                                     new LengthFieldBasedFrameDecoder(65535,
                                             0, 2, 0, 2));
                             ch.pipeline().addLast("msg decoder", new MsgPackDeconder());
+                            //在 ByteBuf 之前增加 2个字节的 消息长度
                             ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(2));
                             ch.pipeline().addLast("msg encoder", new MsgPackEncoder());
-                            ch.pipeline().addLast(new EchoClientHandler(10));
+                            ch.pipeline().addLast(new EchoClientHandler(100));
                         }
                     });
             ChannelFuture f = b.connect(host, port).sync();
