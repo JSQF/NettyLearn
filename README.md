@@ -22,6 +22,7 @@ MessagePack 编解码器开发
 MessagePack 编解码器 + 粘包、拆包
 # character8
 使用 ProtoBuf 的编解码 器（序列化和反序列化）,需要加入 分隔符（粘包、拆包）
-
+# character9
+使用 marshalling 编解码 序列化和反序列化），自带 粘包、拆包 功能
 
 #增加 protobuf maven 依赖
